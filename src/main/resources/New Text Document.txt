@@ -1,0 +1,80 @@
+Áp dụng mạng tích chập (CNN) và DenseNet201 vào xây dựng mô hình bán trái cây tự động dựa trên thị giác máy tính
+12348888
+
+- Quan hệ OneToMany
+mappedBy đứng trên list (Ví dụ cart có nhiều cartDetail(list) thì cart là thằng cầm mappedBy), 
+thằng cartDetail cầm cartId và trên nó là JoinColumn, owning side là cartDetail, cart là inverse side
+Khi thêm/xoá phần tử bên chủ động(owning side) JPA sẽ cập nhập bảng bị động(inverse side)
+
+- Quan hệ ManyToMany
+Dùng joinTable viết bên chủ động ví dụ role và permission thì viết bên role
+Bên còn lại dùng mappedBy
+Khi thêm/xoá phần tử bên chủ động JPA sẽ cập nhập bảng trung gian
+
+@JsonIgnore là một annotation của Jackson, được sử dụng để được dùng để kiểm soát việc bỏ qua (ignore) 
+một thuộc tính cụ thể khi chuyển đổi đối tượng Java thành JSON (serialization) hoặc ngược lại (deserialization).
++ Ngăn chặn lặp vô hạn (Infinite Recursion) trong mối quan hệ hai chiều
++ Dùng trước thông tin nhạy cảm như password hay token để nó không chuyển từ java obj thành phản hồi json
++ Ngăn chặn deserialize không mong muốn (Dùng trước id để id chỉ được tự động tăng trong cơ sở dữ liệu mà ko dc gán từ json)
+
+
+- Quy trình chuyển đổi giữa các tầng về thời gian (Bỏ chuyển sang dùng Instant)
++ Từ React → Spring Boot
+Frontend (React): Gửi ngày giờ dưới dạng chuỗi ISO 8601.
+const isoString = new Date().toISOString(); // "2023-10-25T14:30:00.000Z"
+Backend (Spring Boot): Nhận chuỗi ISO 8601 và chuyển đổi thành LocalDateTime hoặc ZonedDateTime.
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+private LocalDateTime dateTime;
+
++ Từ Spring Boot → MySQL
+Backend (Spring Boot): Lưu trữ ngày giờ dưới dạng LocalDateTime hoặc ZonedDateTime.
+Database (MySQL): Sử dụng kiểu DATETIME hoặc TIMESTAMP.
+
++ Từ MySQL → Spring Boot → React
+Database (MySQL): Truy vấn ngày giờ dưới dạng DATETIME hoặc TIMESTAMP.
+Backend (Spring Boot): Chuyển đổi thành chuỗi ISO 8601 trước khi trả về frontend.
+@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+private LocalDateTime dateTime;
+Frontend (React): Nhận chuỗi ISO 8601 và chuyển đổi thành Date object
+const date = new Date(isoString);
+
+- Quy trình upload file :
++ Upload file ảnh như avatar, productImage, catagoryImage được lưu vào src/main/resources/static/upload
+
+- Thêm seedData vào bằng CommandLineRunner
+
+- Sinh key jwt base 64 : node -e "console.log(require('crypto').randomBytes(64).toString('base64'));"
+Header: Chứa thông tin về thuật toán mã hóa và loại token
+Payload: Chứa thông tin người dùng và các claim (yêu cầu)
+Signature: Được tạo bằng cách mã hóa Header và Payload với một secret key.
++ Nếu nội dung của Header hoặc Payload bị thay đổi, chữ ký sẽ không còn hợp lệ, giúp phát hiện việc giả mạo.
+
+
+- Cách tạo truy vấn
+public interface ProductRepository extends JpaRepository<Product, Long> {
+
+    // Tìm sản phẩm theo tên
+    List<Product> findByName(String name);
+
+    // Tìm sản phẩm có giá lớn hơn một giá trị
+    List<Product> findByPriceGreaterThan(BigDecimal price);
+
+    // Tìm sản phẩm có tên chứa một chuỗi
+    List<Product> findByNameContaining(String keyword);
+
+    // Tìm sản phẩm thuộc một danh mục và sắp xếp theo giá
+    List<Product> findByCategoryOrderByPriceAsc(String category);
+
+    // Đếm số lượng sản phẩm thuộc một danh mục
+    long countByCategory(String category);
+
+    // Kiểm tra xem có tồn tại sản phẩm với tên cụ thể hay không
+    boolean existsByName(String name);
+
+    // Xóa sản phẩm có tên cụ thể
+    void deleteByName(String name);
+}
+
+git remote add origin https://github.com/tcmytt/ecommerce.git
+git branch -M main
+git push -u origin main
