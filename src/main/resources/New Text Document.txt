@@ -78,3 +78,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 git remote add origin https://github.com/tcmytt/ecommerce.git
 git branch -M main
 git push -u origin main
+
+git config --global user.name "Hiep"
+git config --global user.email "tcmytt@gmail.com"

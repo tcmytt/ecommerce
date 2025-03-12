@@ -29,6 +29,7 @@ public class User {
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     private Boolean gender;
@@ -44,6 +45,7 @@ public class User {
     private String dateOfBirth;
 
     @Column(columnDefinition = "TEXT")
+    @JsonIgnore
     private String refreshToken;
 
     private String createdAt;

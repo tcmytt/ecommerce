@@ -1,5 +1,9 @@
 package io.github.tcmytt.ecommerce.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import io.github.tcmytt.ecommerce.domain.Role;
@@ -17,14 +21,22 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public List<User> searchUsers(String keyword) {
+        return userRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(keyword, keyword);
+    }
+
     public User handleCreateUser(User user) {
-
-        // check role
-
         Role r = this.roleService.fetchByName("USER");
         user.setRole(r);
-
         return this.userRepository.save(user);
+    }
+
+    public User handleUpdateUser(User user) {
+        return this.userRepository.save(user);
+    }
+
+    public void deleteUserById(long id) {
+        this.userRepository.deleteById(id);
     }
 
     public User handleGetUserByUsername(String username) {
@@ -61,4 +73,13 @@ public class UserService {
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
+
+    public Page<User> fetchAllWithPaginationAndSorting(Pageable pageable) {
+        return this.userRepository.findAll(pageable);
+    }
+
+    public User fetchById(long id) {
+        return this.userRepository.findById(id).orElse(null);
+    }
+
 }

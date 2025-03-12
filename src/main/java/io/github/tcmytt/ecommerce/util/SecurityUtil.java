@@ -120,6 +120,34 @@ public class SecurityUtil {
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
     }
 
+        /**
+     * Lấy thông tin người dùng hiện tại từ Security Context.
+     *
+     * @return Optional<UserDetails> nếu người dùng đã đăng nhập, ngược lại trả về Optional.empty().
+     */
+    public static Optional<UserDetails> getUserFromSecurityContext() {
+        // Lấy Authentication từ Security Context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Kiểm tra xem người dùng đã xác thực chưa
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return Optional.empty();
+        }
+
+        // Lấy principal từ Authentication
+        Object principal = authentication.getPrincipal();
+
+        // Kiểm tra kiểu dữ liệu của principal
+        if (principal instanceof UserDetails) {
+            return Optional.of((UserDetails) principal);
+        } else if (principal instanceof String) {
+            // Trường hợp principal là username (chuỗi)
+            throw new RuntimeException("Principal is a String, not UserDetails");
+        }
+
+        return Optional.empty();
+    }
+
     private static String extractPrincipal(Authentication authentication) {
         if (authentication == null) {
             return null;
