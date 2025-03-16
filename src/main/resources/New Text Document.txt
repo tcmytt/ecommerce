@@ -81,3 +81,10 @@ git push -u origin main
 
 git config --global user.name "Hiep"
 git config --global user.email "tcmytt@gmail.com"
+
+Cách lấy ảnh : http://localhost:8080/upload/products/abc123_image.jpg
+<img
+    src={`http://localhost:8080${product.mainImage}`}
+    alt={product.name}
+    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+/>

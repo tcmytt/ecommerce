@@ -7,6 +7,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.List;
 
+import io.github.tcmytt.ecommerce.domain.enums.CouponType;
+
 @Entity
 @Table(name = "coupons")
 @Getter
@@ -18,6 +20,8 @@ public class Coupon {
 
     @Enumerated(EnumType.STRING)
     private CouponType type;
+
+    private String code;
 
     private BigDecimal value;
 
@@ -37,8 +41,4 @@ public class Coupon {
 
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders;
-}
-
-enum CouponType {
-    PERCENTAGE, FIXED
 }

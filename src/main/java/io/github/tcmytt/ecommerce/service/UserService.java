@@ -26,6 +26,7 @@ public class UserService {
     }
 
     public User handleCreateUser(User user) {
+        user.setAvatar("/upload/avatars/defaultAvatar.png");
         Role r = this.roleService.fetchByName("USER");
         user.setRole(r);
         return this.userRepository.save(user);

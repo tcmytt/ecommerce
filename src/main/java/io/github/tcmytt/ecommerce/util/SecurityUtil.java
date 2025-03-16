@@ -25,13 +25,18 @@ import org.springframework.stereotype.Service;
 
 import com.nimbusds.jose.util.Base64;
 
+import io.github.tcmytt.ecommerce.domain.User;
 import io.github.tcmytt.ecommerce.domain.response.ResLoginDTO;
+import io.github.tcmytt.ecommerce.service.UserService;
 
 @Service
 public class SecurityUtil {
     private final JwtEncoder jwtEncoder;
+    private final UserService userService;
 
-    public SecurityUtil(JwtEncoder jwtEncoder) {
+    public SecurityUtil(JwtEncoder jwtEncoder,
+            UserService userService) {
+        this.userService = userService;
         this.jwtEncoder = jwtEncoder;
     }
 
@@ -169,6 +174,16 @@ public class SecurityUtil {
     }
 
 
+    public User getCurrentUser() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User is not authenticated");
+        }
+
+        String username = authentication.getName();
+        return userService.handleGetUserByUsername(username);
+    }
+    
         /**
      * Check if a user is authenticated.
      *

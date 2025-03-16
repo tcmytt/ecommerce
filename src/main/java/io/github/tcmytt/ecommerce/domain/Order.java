@@ -2,6 +2,8 @@ package io.github.tcmytt.ecommerce.domain;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.github.tcmytt.ecommerce.domain.enums.OrderStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -51,8 +53,4 @@ public class Order {
         this.createdAt = LocalDateTime.now().toString();
     }
 
-}
-
-enum OrderStatus {
-    PENDING, SHIPPED, DELIVERED, CANCELLED
 }

@@ -5,9 +5,12 @@ import java.util.List;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import io.github.tcmytt.ecommerce.domain.Category;
 import io.github.tcmytt.ecommerce.domain.Permission;
 import io.github.tcmytt.ecommerce.domain.Role;
 import io.github.tcmytt.ecommerce.domain.User;
+import io.github.tcmytt.ecommerce.repository.CategoryRepository;
 import io.github.tcmytt.ecommerce.repository.PermissionRepository;
 import io.github.tcmytt.ecommerce.repository.RoleRepository;
 import io.github.tcmytt.ecommerce.repository.UserRepository;
@@ -19,12 +22,15 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryRepository categoryRepository;
 
     public DatabaseInitializer(
             PermissionRepository permissionRepository,
             RoleRepository roleRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
         this.permissionRepository = permissionRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
@@ -38,6 +44,7 @@ public class DatabaseInitializer implements CommandLineRunner {
         long countPermissions = this.permissionRepository.count();
         long countRoles = this.roleRepository.count();
         long countUsers = this.userRepository.count();
+        long countCategories = this.categoryRepository.count();
 
         // Khởi tạo Permissions nếu chưa có
         if (countPermissions == 0) {
@@ -135,6 +142,79 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             this.userRepository.save(adminUser);
             this.userRepository.save(regularUser);
+        }
+
+        // Khởi tạo categories
+        if (countCategories == 0) {
+            Category vehicles = new Category(null, "Vehicles", "All types of vehicles", null, "vehicles.jpg", null);
+            Category fashion = new Category(null, "Fashion", "Clothing and accessories", null, "fashion.jpg", null);
+            Category food = new Category(null, "Food", "Various types of food", null, "food.jpg", null);
+            Category technology = new Category(null, "Technology", "Electronic devices and gadgets", null,
+                    "technology.jpg", null);
+            Category medicine = new Category(null, "Medicine", "Healthcare and wellness products", null, "medicine.jpg",
+                    null);
+            Category books = new Category(null, "Books", "All types of books", null, "books.jpg", null);
+
+            // Tạo các danh mục con
+            Category cars = new Category(null, "Cars", "Automobiles", vehicles, "cars.jpg", null);
+            Category motorcycles = new Category(null, "Motorcycles", "Two-wheeled vehicles", vehicles,
+                    "motorcycles.jpg", null);
+            Category bicycles = new Category(null, "Bicycles", "Cycling equipment", vehicles, "bicycles.jpg", null);
+
+            Category shirts = new Category(null, "Shirts", "Upper body clothing", fashion, "shirts.jpg", null);
+            Category pants = new Category(null, "Pants", "Lower body clothing", fashion, "pants.jpg", null);
+            Category hats = new Category(null, "Hats", "Headwear", fashion, "hats.jpg", null);
+
+            Category seafood = new Category(null, "Seafood", "Marine-based food", food, "seafood.jpg", null);
+            Category fastFood = new Category(null, "Fast Food", "Quick meals", food, "fast-food.jpg", null);
+            Category pork = new Category(null, "Pork", "Pork meat products", food, "pork.jpg", null);
+            Category beef = new Category(null, "Beef", "Beef meat products", food, "beef.jpg", null);
+
+            Category smartphones = new Category(null, "Smartphones", "Mobile phones", technology, "smartphones.jpg",
+                    null);
+            Category laptops = new Category(null, "Laptops", "Portable computers", technology, "laptops.jpg", null);
+            Category headphones = new Category(null, "Headphones", "Audio devices", technology, "headphones.jpg", null);
+
+            Category supplements = new Category(null, "Supplements", "Health supplements", medicine, "supplements.jpg",
+                    null);
+            Category medications = new Category(null, "Medications", "Prescription drugs", medicine, "medications.jpg",
+                    null);
+
+            Category novels = new Category(null, "Novels", "Fictional stories", books, "novels.jpg", null);
+            Category textbooks = new Category(null, "Textbooks", "Educational materials", books, "textbooks.jpg", null);
+            Category comics = new Category(null, "Comics", "Illustrated stories", books, "comics.jpg", null);
+
+            // Lưu các danh mục vào database
+            categoryRepository.save(vehicles);
+            categoryRepository.save(fashion);
+            categoryRepository.save(food);
+            categoryRepository.save(technology);
+            categoryRepository.save(medicine);
+            categoryRepository.save(books);
+
+            categoryRepository.save(cars);
+            categoryRepository.save(motorcycles);
+            categoryRepository.save(bicycles);
+
+            categoryRepository.save(shirts);
+            categoryRepository.save(pants);
+            categoryRepository.save(hats);
+
+            categoryRepository.save(seafood);
+            categoryRepository.save(fastFood);
+            categoryRepository.save(pork);
+            categoryRepository.save(beef);
+
+            categoryRepository.save(smartphones);
+            categoryRepository.save(laptops);
+            categoryRepository.save(headphones);
+
+            categoryRepository.save(supplements);
+            categoryRepository.save(medications);
+
+            categoryRepository.save(novels);
+            categoryRepository.save(textbooks);
+            categoryRepository.save(comics);
         }
 
         // Kiểm tra và thông báo kết quả

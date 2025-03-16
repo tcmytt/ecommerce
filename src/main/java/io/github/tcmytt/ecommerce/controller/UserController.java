@@ -2,6 +2,7 @@ package io.github.tcmytt.ecommerce.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,19 +17,32 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.github.tcmytt.ecommerce.domain.User;
+import io.github.tcmytt.ecommerce.service.FileStorageService;
 import io.github.tcmytt.ecommerce.service.UserService;
+import io.github.tcmytt.ecommerce.util.SecurityUtil;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
+    private final FileStorageService fileStorageService;
+    private final SecurityUtil securityUtil;
 
-    public UserController(UserService userService) {
+    @Value("${file.user-avatar-dir}")
+    private String userAvatarDir;
+
+    public UserController(UserService userService,
+            FileStorageService fileStorageService,
+            SecurityUtil securityUtil) {
         this.userService = userService;
+        this.fileStorageService = fileStorageService;
+        this.securityUtil = securityUtil;
     }
 
     @GetMapping
@@ -90,4 +104,25 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @PostMapping(value = "/avatar", consumes = "multipart/form-data")
+    public ResponseEntity<User> updateAvatar(
+            @RequestPart("file") MultipartFile file) {
+
+        // Lấy user hiện tại từ SecurityContext
+        User currentUser = securityUtil.getCurrentUser();
+
+        // Lưu ảnh mới và lấy đường dẫn
+        String newAvatarPath = fileStorageService.storeAvatar(file);
+
+        // Xóa ảnh cũ nếu có
+        if (currentUser.getAvatar() != null) {
+            fileStorageService.deleteFile(currentUser.getAvatar(), userAvatarDir);
+        }
+
+        // Cập nhật avatar mới
+        currentUser.setAvatar(newAvatarPath);
+        User updatedUser = userService.handleUpdateUser(currentUser);
+
+        return ResponseEntity.ok(updatedUser);
+    }
 }
