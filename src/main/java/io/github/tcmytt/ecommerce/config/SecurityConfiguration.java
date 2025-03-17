@@ -46,10 +46,10 @@ public class SecurityConfiguration {
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
                 "/upload/**",
                 "/api/v1/email/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
                 "/actuator/**",
-                "/swagger-ui.html"
+                "/v3/api-docs/**", // Tài liệu API của Swagger
+                "/swagger-ui/**", // Tài nguyên của Swagger UI
+                "/swagger-ui.html", // Trang chính của Swagger UI
         };
 
         http

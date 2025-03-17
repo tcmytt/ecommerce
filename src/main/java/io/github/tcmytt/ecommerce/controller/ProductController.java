@@ -31,6 +31,9 @@ import io.github.tcmytt.ecommerce.service.ProductImageService;
 import io.github.tcmytt.ecommerce.service.ProductService;
 import io.github.tcmytt.ecommerce.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
@@ -49,6 +52,8 @@ public class ProductController {
         this.fileStorageService = fileStorageService;
     }
 
+    @Operation(summary = "Get all products", description = "Returns a list of all products with pagination and sorting")
+    @ApiResponse(responseCode = "200", description = "Products retrieved successfully")
     @GetMapping
     public ResponseEntity<Page<Product>> fetchAllWithPaginationAndSorting(
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
@@ -77,6 +82,8 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "Get product by id", description = "Returns a product by id")
+    @ApiResponse(responseCode = "200", description = "Product retrieved successfully")
     @GetMapping("/{id}")
     public ResponseEntity<Product> fetchById(@PathVariable("id") long id) throws Exception {
         Product p = this.productService.getProductById(id);
@@ -86,6 +93,9 @@ public class ProductController {
         return ResponseEntity.ok().body(p);
     }
 
+    @Operation(summary = "Create a new product", description = "Create a new product with images")
+    @ApiResponse(responseCode = "201", description = "Product created successfully")
+    @ApiResponse(responseCode = "400", description = "Bad request")
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Product> createProduct(
             @RequestPart("product") ReqCreateProductDTO productDTO,
@@ -111,6 +121,8 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
+    @Operation(summary = "Update a product", description = "Update a product without updating images")
+    @ApiResponse(responseCode = "200", description = "Product updated successfully")
     @PutMapping
     public ResponseEntity<Product> updateProduct(@RequestBody ReqUpdateProductDTO productDTO) {
 
@@ -125,6 +137,8 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
+    @Operation(summary = "Delete a product", description = "Delete a product by id")
+    @ApiResponse(responseCode = "200", description = "Product deleted successfully")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable("id") long id) {
         if (productService.isIdExist(id) == false) {

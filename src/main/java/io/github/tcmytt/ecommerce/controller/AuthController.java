@@ -26,6 +26,8 @@ import io.github.tcmytt.ecommerce.domain.response.ResCreateUserDTO;
 import io.github.tcmytt.ecommerce.domain.response.ResLoginDTO;
 import io.github.tcmytt.ecommerce.service.UserService;
 import io.github.tcmytt.ecommerce.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -51,6 +53,9 @@ public class AuthController {
         @Value("${jwt.refresh-token-validity-in-seconds}")
         private long refreshTokenExpiration;
 
+        @Operation(summary = "Login", description = "Login with username and password")
+        @ApiResponse(responseCode = "200", description = "Login successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @PostMapping("/login")
         public ResponseEntity<ResLoginDTO> login(@RequestBody ReqLoginDTO loginDto) {
                 // Nạp input gồm username/password vào Security
@@ -103,6 +108,9 @@ public class AuthController {
                                 .body(res);
         }
 
+        @Operation(summary = "Get account", description = "Get account information")
+        @ApiResponse(responseCode = "200", description = "Get account successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @GetMapping("/account")
         public ResponseEntity<ResLoginDTO.UserLogin> getAccount() {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent()
@@ -126,6 +134,9 @@ public class AuthController {
                 return ResponseEntity.ok().body(userLogin);
         }
 
+        @Operation(summary = "Register", description = "Register new account")
+        @ApiResponse(responseCode = "201", description = "Register successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @PostMapping("/register")
         public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User regUser) throws Exception {
                 boolean isEmailExist = this.userService.isEmailExist(regUser.getEmail());
@@ -140,6 +151,9 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(user));
         }
 
+        @Operation(summary = "Logout", description = "Logout account")
+        @ApiResponse(responseCode = "200", description = "Logout successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @PostMapping("/logout")
         public ResponseEntity<String> logout() throws Exception {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get()
@@ -166,6 +180,9 @@ public class AuthController {
                                 .body("Đăng xuất thành công");
         }
 
+        @Operation(summary = "Refresh token", description = "get new Refresh token ")
+        @ApiResponse(responseCode = "200", description = "Refresh token successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @GetMapping("/refresh")
         public ResponseEntity<ResLoginDTO> getRefreshToken(
                         @CookieValue(name = "refresh_token", defaultValue = "abc") String refresh_token)
@@ -223,6 +240,9 @@ public class AuthController {
                                 .body(res);
         }
 
+        @Operation(summary = "OAuth2 Google Login ", description = "Login Google with OAuth2")
+        @ApiResponse(responseCode = "200", description = "Login successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @GetMapping("/oauth2/success")
         public ResponseEntity<ResLoginDTO> handleOAuth2LoginSuccess(@AuthenticationPrincipal OAuth2User principal) {
                 // Lấy thông tin người dùng từ OAuth2
@@ -269,6 +289,8 @@ public class AuthController {
                                 .body(res);
         }
 
+        @Operation(summary = "OAuth2 Google Login Failure", description = "Login Google with OAuth2")
+        @ApiResponse(responseCode = "401", description = "Login failure")
         @GetMapping("/oauth2/failure")
         public ResponseEntity<String> handleOAuth2LoginFailure() {
                 System.out.println(">>> OAuth2 Login Failure");

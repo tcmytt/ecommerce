@@ -104,3 +104,12 @@ Câu lệnh clean và build
 ./gradlew clean build
 clean: Xóa các file đã biên dịch trước đó.
 build: Biên dịch lại dự án và tải dependencies mới.
+
+git reset --soft
+--soft : Quay lại trạng thái trước commit, nhưng giữ lại tất cả các thay đổi trong staging area (tức là các file đã được thêm vào git add
+
+git reset --soft HEAD~2
+HEAD~2: Chỉ định quay lại 2 commit trước
+
+
+http://localhost:8080/swagger-ui.html

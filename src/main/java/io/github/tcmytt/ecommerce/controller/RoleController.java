@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.github.tcmytt.ecommerce.domain.Role;
 import io.github.tcmytt.ecommerce.service.RoleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -29,6 +31,9 @@ public class RoleController {
         this.roleService = roleService;
     }
 
+    @Operation(summary = "Create role", description = "Create a new role")
+    @ApiResponse(responseCode = "201", description = "Role created successfully")
+    @ApiResponse(responseCode = "400", description = "Role with name already exists")
     @PostMapping
     public ResponseEntity<Role> create(@Valid @RequestBody Role r) throws Exception {
         // check name
@@ -38,6 +43,9 @@ public class RoleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.roleService.create(r));
     }
 
+    @Operation(summary = "Update role", description = "Update an existing role")
+    @ApiResponse(responseCode = "200", description = "Role updated successfully")
+    @ApiResponse(responseCode = "400", description = "Role with name does not exist")
     @PutMapping
     public ResponseEntity<Role> update(@Valid @RequestBody Role r) throws Exception {
         if (this.roleService.existByName(r.getName()) == false) {
@@ -46,6 +54,9 @@ public class RoleController {
         return ResponseEntity.status(HttpStatus.OK).body(this.roleService.update(r));
     }
 
+    @Operation(summary = "Delete role", description = "Delete an existing role")
+    @ApiResponse(responseCode = "200", description = "Role deleted successfully")
+    @ApiResponse(responseCode = "400", description = "Role with id does not exist")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") long id) throws Exception {
         // check id
@@ -61,6 +72,9 @@ public class RoleController {
     // return ResponseEntity.ok().body(this.roleService.fetchAll());
     // }
 
+    @Operation(summary = "Get role by id", description = "Get a role by id")
+    @ApiResponse(responseCode = "200", description = "Role retrieved successfully")
+    @ApiResponse(responseCode = "400", description = "Role with id does not exist")
     @GetMapping("/{id}")
     public ResponseEntity<Role> fetchById(@PathVariable("id") long id) throws Exception {
         Role role = this.roleService.fetchById(id);
@@ -70,6 +84,8 @@ public class RoleController {
         return ResponseEntity.ok().body(role);
     }
 
+    @Operation(summary = "Get all roles", description = "Get all roles with pagination and sorting")
+    @ApiResponse(responseCode = "200", description = "Roles retrieved successfully")
     @GetMapping
     public Page<Role> fetchByPaginationAndSorting(
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,

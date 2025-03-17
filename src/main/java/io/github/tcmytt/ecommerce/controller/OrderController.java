@@ -22,6 +22,8 @@ import io.github.tcmytt.ecommerce.domain.request.ReqCreateOrderDTO;
 import io.github.tcmytt.ecommerce.domain.request.ReqUpdateOrderStatusDTO;
 import io.github.tcmytt.ecommerce.service.OrderService;
 import io.github.tcmytt.ecommerce.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -35,6 +37,8 @@ public class OrderController {
         this.securityUtil = securityUtil;
     }
 
+    @Operation(summary = "Create order", description = "Create a new order")
+    @ApiResponse(responseCode = "201", description = "Order created successfully")
     @PostMapping(consumes = "application/json")
     public ResponseEntity<Order> createOrder(@RequestBody ReqCreateOrderDTO orderDTO) {
         // Lấy user hiện tại
@@ -49,6 +53,8 @@ public class OrderController {
     /**
      * Lấy danh sách đơn hàng của người dùng hiện tại
      */
+    @Operation(summary = "Get all orders", description = "Returns a list of all orders with pagination and sorting")
+    @ApiResponse(responseCode = "200", description = "Orders retrieved successfully")
     @GetMapping
     public ResponseEntity<Page<Order>> getOrders(
             @RequestParam(defaultValue = "0") int page,
@@ -71,6 +77,8 @@ public class OrderController {
     /**
      * Xem chi tiết đơn hàng
      */
+    @Operation(summary = "Get order by ID", description = "Returns an order by ID")
+    @ApiResponse(responseCode = "200", description = "Order retrieved successfully")
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
         // Lấy user hiện tại
@@ -85,6 +93,8 @@ public class OrderController {
     /**
      * Cập nhật trạng thái đơn hàng (chỉ admin)
      */
+    @Operation(summary = "Update order status", description = "Update order status")
+    @ApiResponse(responseCode = "200", description = "Order status updated successfully")
     @PutMapping("/{orderId}/status")
     public ResponseEntity<Order> updateOrderStatus(
             @PathVariable Long orderId,
@@ -99,6 +109,8 @@ public class OrderController {
     /**
      * Hủy đơn hàng
      */
+    @Operation(summary = "Cancel order", description = "Cancel an order")
+    @ApiResponse(responseCode = "204", description = "Order canceled successfully")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
         // Lấy user hiện tại
