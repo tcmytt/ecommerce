@@ -55,19 +55,26 @@ public class SecurityConfiguration {
         http
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(
-                        authz -> authz
-                                .requestMatchers(whiteList).permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").permitAll()
-
-                                .anyRequest().authenticated())
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(whiteList).permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").permitAll()
+                        // Các endpoint khác yêu cầu xác thực qua OAuth2 Login
+                        .anyRequest().authenticated())
+                // Cấu hình OAuth2 Resource Server (JWT)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-
+                // Cấu hình OAuth2 Login (Google)
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/google") // Trang đăng nhập OAuth2
+                        .defaultSuccessUrl("/api/v1/auth/oauth2/success") // Redirect sau khi đăng nhập thành công
+                        .failureUrl("/api/v1/auth/oauth2/failure") // Redirect nếu đăng nhập thất bại
+                )
                 .formLogin(f -> f.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }

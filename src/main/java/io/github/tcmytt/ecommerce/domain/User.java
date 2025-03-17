@@ -37,7 +37,7 @@ public class User {
     // Chỉ lưu đường dẫn hình ảnh
     private String avatar;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String address;
 
     private String phoneNumber;

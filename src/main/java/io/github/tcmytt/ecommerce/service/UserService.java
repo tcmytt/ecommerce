@@ -83,4 +83,22 @@ public class UserService {
         return this.userRepository.findById(id).orElse(null);
     }
 
+    public User findOrCreateUserByEmail(String email, String name) {
+        // Kiểm tra xem người dùng đã tồn tại chưa
+        Boolean isExist = userRepository.existsByEmail(email);
+        if (isExist) {
+            return userRepository.findByEmail(email);
+        }
+
+        // Tạo người dùng mới nếu chưa tồn tại
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setName(name);
+        newUser.setPassword(""); // Không cần password vì đăng nhập bằng OAuth2
+        newUser.setAvatar("/upload/avatars/defaultAvatar.png");
+        Role r = this.roleService.fetchByName("USER");
+        newUser.setRole(r);
+        return userRepository.save(newUser);
+    }
+
 }

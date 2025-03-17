@@ -88,3 +88,19 @@ Cách lấy ảnh : http://localhost:8080/upload/products/abc123_image.jpg
     alt={product.name}
     style={{ width: "150px", height: "150px", objectFit: "cover" }}
 />
+
+
+
+Sau khi thêm thư viện vào build.gradle, bạn cần chạy lệnh để tải thư viện về máy tính của mình.
+// Nó sẽ chạy lại lệnh tạo csdl nên cần kết nối mysql
+Sử dụng lệnh sau để tải và cập nhật dependencies:
+./gradlew build --refresh-dependencies
+--refresh-dependencies: Buộc Gradle tải lại tất cả các dependencies thay vì sử dụng cache.
+
+Nếu bạn chỉ muốn tải dependencies mà không cần build toàn bộ dự án:
+./gradlew dependencies
+
+Câu lệnh clean và build
+./gradlew clean build
+clean: Xóa các file đã biên dịch trước đó.
+build: Biên dịch lại dự án và tải dependencies mới.
