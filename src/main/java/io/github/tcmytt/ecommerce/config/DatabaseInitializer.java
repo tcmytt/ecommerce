@@ -69,14 +69,14 @@ public class DatabaseInitializer implements CommandLineRunner {
             permissions.add(new Permission("Update an order", "/api/v1/orders", "PUT", "ORDERS"));
             permissions.add(new Permission("Delete an order", "/api/v1/orders/{id}", "DELETE", "ORDERS"));
             permissions.add(new Permission("Get an order by id", "/api/v1/orders/{id}", "GET", "ORDERS"));
-            permissions.add(new Permission("Get orders with pagination", "/api/v1/orders", "GET", "ORDERS"));
+            permissions.add(new Permission("Get user orders with pagination", "/api/v1/orders", "GET", "ORDERS"));
 
             // Product
             permissions.add(new Permission("Create a product", "/api/v1/products", "POST", "PRODUCTS"));
             permissions.add(new Permission("Update a product", "/api/v1/products", "PUT", "PRODUCTS"));
             permissions.add(new Permission("Delete a product", "/api/v1/products/{id}", "DELETE", "PRODUCTS"));
             permissions.add(new Permission("Get a product by id", "/api/v1/products/{id}", "GET", "PRODUCTS"));
-            permissions.add(new Permission("Get products with pagination", "/api/v1/products", "GET", "PRODUCTS"));
+            permissions.add(new Permission("Get all products with pagination", "/api/v1/products", "GET", "PRODUCTS"));
 
             // Review
             permissions.add(new Permission("Create a review", "/api/v1/reviews", "POST", "REVIEWS"));
@@ -87,10 +87,21 @@ public class DatabaseInitializer implements CommandLineRunner {
 
             // User
             permissions.add(new Permission("Create a user", "/api/v1/users", "POST", "USERS"));
-            permissions.add(new Permission("Update a user", "/api/v1/users", "PUT", "USERS"));
+            permissions.add(new Permission("Update User login", "/api/v1/users", "PUT", "USERS"));
             permissions.add(new Permission("Delete a user", "/api/v1/users/{id}", "DELETE", "USERS"));
             permissions.add(new Permission("Get a user by id", "/api/v1/users/{id}", "GET", "USERS"));
-            permissions.add(new Permission("Get users with pagination", "/api/v1/users", "GET", "USERS"));
+            permissions
+                    .add(new Permission("Get all users with pagination and search", "/api/v1/users", "GET", "USERS"));
+            permissions.add(new Permission("Update User login Avatar", "/api/v1/users/avatar", "POST", "USERS"));
+
+            // Auth
+            permissions.add(new Permission("Login", "/api/v1/auth/login", "POST", "AUTH"));
+            permissions.add(new Permission("Logout", "/api/v1/auth/logout", "POST", "AUTH"));
+            permissions.add(new Permission("Refresh token", "/api/v1/auth/refresh", "POST", "AUTH"));
+            permissions.add(new Permission("Register", "/api/v1/auth/register", "POST", "AUTH"));
+            permissions.add(new Permission("Get Account", "/api/v1/auth/getAccount", "GET", "AUTH"));
+            permissions.add(new Permission("Forgot password", "/api/v1/auth/forgot-password", "POST", "AUTH"));
+            permissions.add(new Permission("Reset password", "/api/v1/auth/reset-password", "POST", "AUTH"));
 
             this.permissionRepository.saveAll(permissions);
         }
@@ -110,7 +121,10 @@ public class DatabaseInitializer implements CommandLineRunner {
             userRole.setDescription("Regular user role with limited access");
             userRole.setActive(true);
             userRole.setPermissions(allPermissions.stream()
-                    .filter(p -> p.getModule().equals("PRODUCTS") || p.getModule().equals("ORDERS"))
+                    .filter(p -> p.getModule().equals("PRODUCTS") ||
+                            p.getModule().equals("ORDERS") ||
+                            p.getModule().equals("AUTH") ||
+                            p.getModule().equals("USER"))
                     .toList());
 
             this.roleRepository.save(adminRole);

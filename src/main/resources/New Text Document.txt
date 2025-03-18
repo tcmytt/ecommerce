@@ -113,3 +113,7 @@ HEAD~2: Chỉ định quay lại 2 commit trước
 
 
 http://localhost:8080/swagger-ui.html
+
+Cấu hình intercepter permission
+
+Khi đặt hàng xong gửi mail về thông tin đơn hàng

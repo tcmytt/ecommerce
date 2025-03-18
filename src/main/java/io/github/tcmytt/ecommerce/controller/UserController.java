@@ -1,7 +1,5 @@
 package io.github.tcmytt.ecommerce.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.github.tcmytt.ecommerce.domain.request.ReqResetPasswordDTO;
 import io.github.tcmytt.ecommerce.domain.User;
 import io.github.tcmytt.ecommerce.service.FileStorageService;
 import io.github.tcmytt.ecommerce.service.UserService;
@@ -32,6 +32,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
+
+    private final PasswordEncoder passwordEncoder;
     private final UserService userService;
     private final FileStorageService fileStorageService;
     private final SecurityUtil securityUtil;
@@ -41,21 +43,22 @@ public class UserController {
 
     public UserController(UserService userService,
             FileStorageService fileStorageService,
-            SecurityUtil securityUtil) {
+            SecurityUtil securityUtil, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.fileStorageService = fileStorageService;
         this.securityUtil = securityUtil;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    @Operation(summary = "Get all users", description = "Returns a list of all users with pagination and sorting")
+    @Operation(summary = "Get users", description = "Returns a list of users with pagination, sorting, or search by keyword")
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     @GetMapping
-    public ResponseEntity<Page<User>> fetchAllWithPaginationAndSorting(
+    public ResponseEntity<Page<User>> fetchUsers(
+            @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
-            @RequestParam(name = "direction", defaultValue = "asc") String direction) {
-
-        int page = 0;
-        int size = 10;
+            @RequestParam(name = "direction", defaultValue = "asc") String direction,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
         // Xác định tiêu chí sắp xếp
         Sort sort = direction.equalsIgnoreCase("asc")
@@ -65,8 +68,14 @@ public class UserController {
         // Tạo đối tượng Pageable
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        // Truy vấn dữ liệu
-        return ResponseEntity.ok().body(this.userService.fetchAllWithPaginationAndSorting(pageable));
+        // Kiểm tra xem có tìm kiếm hay không
+        if (keyword != null && !keyword.isEmpty()) {
+            // Tìm kiếm người dùng với phân trang
+            return ResponseEntity.ok().body(userService.searchUsersWithPagination(keyword, pageable));
+        } else {
+            // Lấy danh sách người dùng với phân trang và sắp xếp
+            return ResponseEntity.ok().body(userService.fetchAllWithPaginationAndSorting(pageable));
+        }
     }
 
     @Operation(summary = "Get user by id", description = "Get a user by id")
@@ -101,6 +110,19 @@ public class UserController {
         if (this.userService.fetchById(u.getId()) == null) {
             throw new Exception("User với id = " + u.getId() + " không tồn tại");
         }
+
+        // Lấy thông tin người dùng hiện tại
+        User currentUser = this.userService.getCurrentUser();
+        if (currentUser == null) {
+            throw new Exception("Không tìm thấy thông tin người dùng hiện tại.");
+        }
+
+        // Kiểm tra quyền truy cập
+        boolean isAdmin = this.userService.isCurrentUserAdmin();
+        if (!isAdmin && u != null && !u.getId().equals(currentUser.getId())) {
+            throw new Exception("Bạn không có quyền cập nhật thông tin của người khác.");
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleUpdateUser(u));
     }
 
@@ -110,15 +132,6 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build(); // 204 No Content
-    }
-
-    @Operation(summary = "Search users", description = "Search users by keyword")
-    @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
-    @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(
-            @RequestParam(name = "keyword", defaultValue = "email") String keyword) {
-        List<User> response = userService.searchUsers(keyword);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Update user avatar", description = "Update user avatar")
@@ -145,4 +158,32 @@ public class UserController {
 
         return ResponseEntity.ok(updatedUser);
     }
+
+    @Operation(summary = "Reset password", description = "Reset password")
+    @ApiResponse(responseCode = "200", description = "Reset password successfully")
+    @ApiResponse(responseCode = "400", description = "Bad request")
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ReqResetPasswordDTO reqResetPasswordDTO) {
+        // Lấy thông tin người dùng hiện tại
+        User user = this.userService.getCurrentUser();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found or unauthorized.");
+        }
+
+        // Kiểm tra mật khẩu cũ
+        if (!this.passwordEncoder.matches(reqResetPasswordDTO.getOldPassWord(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("Old password is incorrect");
+        }
+
+        // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
+        if (this.passwordEncoder.matches(reqResetPasswordDTO.getNewPassword(), user.getPassword())) {
+            return ResponseEntity.badRequest().body("New password must be different from old password.");
+        }
+
+        // Cập nhật mật khẩu mới
+        userService.updatePassword(user.getEmail(),
+                this.passwordEncoder.encode(reqResetPasswordDTO.getNewPassword()));
+        return ResponseEntity.ok().body("Reset password successfully");
+    }
+
 }

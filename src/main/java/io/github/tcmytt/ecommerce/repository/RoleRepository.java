@@ -22,4 +22,25 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
     @NonNull
     Page<Role> findAll(@NonNull Pageable pageable);
+
+    // Kiểm tra xem có tồn tại role ADMIN hay không
+    default boolean isAdminRoleExists() {
+        return existsByName("ADMIN");
+    }
+
+    // Kiểm tra xem có tồn tại role USER hay không
+    default boolean isUserRoleExists() {
+        return existsByName("USER");
+    }
+
+    // Kiểm tra xem một role có phải là ADMIN hay không
+    default boolean isAdminRole(Role role) {
+        return role != null && "ADMIN".equals(role.getName());
+    }
+
+    // Kiểm tra xem một role có phải là USER hay không
+    default boolean isUserRole(Role role) {
+        return role != null && "USER".equals(role.getName());
+    }
+
 }

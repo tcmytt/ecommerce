@@ -56,7 +56,7 @@ public class OrderController {
     @Operation(summary = "Get all orders", description = "Returns a list of all orders with pagination and sorting")
     @ApiResponse(responseCode = "200", description = "Orders retrieved successfully")
     @GetMapping
-    public ResponseEntity<Page<Order>> getOrders(
+    public ResponseEntity<Page<Order>> getOrdersByUser(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -91,7 +91,7 @@ public class OrderController {
     }
 
     /**
-     * Cập nhật trạng thái đơn hàng (chỉ admin)
+     * Cập nhật trạng thái đơn hàng
      */
     @Operation(summary = "Update order status", description = "Update order status")
     @ApiResponse(responseCode = "200", description = "Order status updated successfully")

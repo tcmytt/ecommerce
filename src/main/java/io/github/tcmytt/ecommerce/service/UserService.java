@@ -5,24 +5,38 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.github.tcmytt.ecommerce.domain.Role;
 import io.github.tcmytt.ecommerce.domain.User;
 import io.github.tcmytt.ecommerce.domain.response.ResCreateUserDTO;
+import io.github.tcmytt.ecommerce.repository.RoleRepository;
 import io.github.tcmytt.ecommerce.repository.UserRepository;
+import io.github.tcmytt.ecommerce.util.SecurityUtil;
 
 @Service
 public class UserService {
     private final RoleService roleService;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final SecurityUtil securityUtil;
 
-    public UserService(RoleService roleService, UserRepository userRepository) {
+    public UserService(RoleService roleService,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            SecurityUtil securityUtil) {
+        this.roleRepository = roleRepository;
+        this.securityUtil = securityUtil;
         this.roleService = roleService;
         this.userRepository = userRepository;
     }
 
     public List<User> searchUsers(String keyword) {
         return userRepository.findByNameContainingIgnoreCaseOrEmailContainingIgnoreCase(keyword, keyword);
+    }
+
+    public Page<User> searchUsersWithPagination(String keyword, Pageable pageable) {
+        return userRepository.searchUsersWithPagination(keyword, pageable);
     }
 
     public User handleCreateUser(User user) {
@@ -101,4 +115,30 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    public boolean isCurrentUserAdmin() {
+        User user = securityUtil.getCurrentUser();
+        return roleRepository.isAdminRole(user.getRole());
+    }
+
+    public boolean isCurrentUserUser() {
+        User user = securityUtil.getCurrentUser();
+        return roleRepository.isUserRole(user.getRole());
+    }
+
+    public User getCurrentUser() {
+        return securityUtil.getCurrentUser();
+    }
+
+    public User getUserById(long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public void updatePassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setPassword(newPassword);
+            userRepository.save(user);
+        }
+    }
 }

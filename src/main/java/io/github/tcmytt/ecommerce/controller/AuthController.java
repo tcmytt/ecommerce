@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.tcmytt.ecommerce.domain.User;
+import io.github.tcmytt.ecommerce.domain.request.ReqForgetPasswordDTO;
 import io.github.tcmytt.ecommerce.domain.request.ReqLoginDTO;
 import io.github.tcmytt.ecommerce.domain.response.ResCreateUserDTO;
 import io.github.tcmytt.ecommerce.domain.response.ResLoginDTO;
+import io.github.tcmytt.ecommerce.service.MailService;
 import io.github.tcmytt.ecommerce.service.UserService;
+import io.github.tcmytt.ecommerce.util.OtpUtil;
 import io.github.tcmytt.ecommerce.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,12 +41,18 @@ public class AuthController {
         private final SecurityUtil securityUtil;
         private final UserService userService;
         private final PasswordEncoder passwordEncoder;
+        private final OtpUtil otpUtil;
+        private final MailService mailService;
 
         public AuthController(
                         AuthenticationManagerBuilder authenticationManagerBuilder,
                         SecurityUtil securityUtil,
                         UserService userService,
-                        PasswordEncoder passwordEncoder) {
+                        PasswordEncoder passwordEncoder,
+                        OtpUtil otpUtil,
+                        MailService mailService) {
+                this.mailService = mailService;
+                this.otpUtil = otpUtil;
                 this.authenticationManagerBuilder = authenticationManagerBuilder;
                 this.securityUtil = securityUtil;
                 this.userService = userService;
@@ -295,6 +304,52 @@ public class AuthController {
         public ResponseEntity<String> handleOAuth2LoginFailure() {
                 System.out.println(">>> OAuth2 Login Failure");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Đăng nhập thất bại");
+        }
+
+        @Operation(summary = "Forgot password", description = "Forgot password")
+        @PostMapping("/forgot-password")
+        public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+                // Kiểm tra email có tồn tại không
+                User user = userService.handleGetUserByUsername(email);
+                if (user == null) {
+                        return ResponseEntity.ok("Tài khoản không tồn tại");
+                }
+
+                // Tạo mã xác thực (OTP)
+                String otp = otpUtil.generateOtp();
+
+                // Lưu OTP vào Redis với thời gian hết hạn 3 phút
+                otpUtil.saveOtp(email, otp, 180); // 180 giây = 3 phút
+
+                // Gửi OTP qua email (giả lập gửi email)
+                try {
+                        mailService.sendPasswordResetEmail(email, otp);
+                } catch (Exception e) {
+                        return ResponseEntity.badRequest().body("Lỗi khi gửi email");
+                }
+                return ResponseEntity.ok("Mã xác thực đã được gửi đến email của bạn");
+        }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<String> resetPassword(@Valid @RequestBody ReqForgetPasswordDTO request) {
+                String email = request.getEmail();
+                String providedOtp = request.getOTP();
+                String newPassword = request.getNewPassword();
+
+                // Có thể thêm logic kiểm tra mật khẩu cũ không trùng mật khẩu mới
+
+                // Lấy OTP từ Redis
+                String storedOtp = otpUtil.getOtp(email);
+                if (storedOtp == null || !storedOtp.equals(providedOtp)) {
+                        return ResponseEntity.badRequest().body("Mã xác thực không hợp lệ hoặc đã hết hạn");
+                }
+
+                userService.updatePassword(email, passwordEncoder.encode(newPassword));
+
+                // Xóa OTP khỏi Redis
+                otpUtil.deleteOtp(email);
+
+                return ResponseEntity.ok("Mật khẩu đã được cập nhật thành công");
         }
 
 }

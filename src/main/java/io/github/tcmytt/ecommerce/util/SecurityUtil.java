@@ -125,11 +125,6 @@ public class SecurityUtil {
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
     }
 
-        /**
-     * Lấy thông tin người dùng hiện tại từ Security Context.
-     *
-     * @return Optional<UserDetails> nếu người dùng đã đăng nhập, ngược lại trả về Optional.empty().
-     */
     public static Optional<UserDetails> getUserFromSecurityContext() {
         // Lấy Authentication từ Security Context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -184,7 +179,8 @@ public class SecurityUtil {
         return userService.handleGetUserByUsername(username);
     }
     
-        /**
+
+    /**
      * Check if a user is authenticated.
      *
      * @return true if the user is authenticated, false otherwise.
