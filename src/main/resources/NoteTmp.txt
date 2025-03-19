@@ -117,3 +117,118 @@ http://localhost:8080/swagger-ui.html
 Cấu hình intercepter permission
 
 Khi đặt hàng xong gửi mail về thông tin đơn hàng
+
+- Review API
+POST /api/v1/reviews
+{
+    "productId": 1,
+    "rating": 5,
+    "title": "Great product!",
+    "content": "This product exceeded my expectations. Highly recommended!"
+}
+
+GET /api/v1/reviews/product/1
+[
+    {
+        "id": 1,
+        "productId": 1,
+        "userId": 1,
+        "rating": 5,
+        "title": "Great product!",
+        "content": "This product exceeded my expectations. Highly recommended!",
+        "createdAt": "2023-10-01T12:00:00"
+    },
+    {
+        "id": 2,
+        "productId": 1,
+        "userId": 2,
+        "rating": 4,
+        "title": "Good product",
+        "content": "The product is good but could be better.",
+        "createdAt": "2023-10-01T12:10:00"
+    }
+]
+
+PUT /api/v1/reviews/1
+{
+    "productId": 1,
+    "rating": 4,
+    "title": "Updated review",
+    "content": "I've updated my review after further use of the product."
+}
+
+DELETE /api/v1/reviews/1
+
+- Coupon API 
+POST /api/v1/coupons
+{
+    "type": "PERCENTAGE",
+    "code": "SUMMER20",
+    "value": 20.0,
+    "startDate": "2023-10-01",
+    "endDate": "2023-10-31",
+    "minSpend": 100.0,
+    "maxSpend": 500.0,
+    "usesPerUser": 1,
+    "usesPerCoupon": 100,
+    "status": true
+}
+
+GET /api/v1/coupons/status/true
+[
+    {
+        "id": 1,
+        "type": "PERCENTAGE",
+        "code": "SUMMER20",
+        "value": 20.0,
+        "startDate": "2023-10-01",
+        "endDate": "2023-10-31",
+        "minSpend": 100.0,
+        "maxSpend": 500.0,
+        "usesPerUser": 1,
+        "usesPerCoupon": 100,
+        "status": true
+    },
+    {
+        "id": 2,
+        "type": "FIXED_AMOUNT",
+        "code": "WINTER50",
+        "value": 50.0,
+        "startDate": "2023-12-01",
+        "endDate": "2023-12-31",
+        "minSpend": 200.0,
+        "maxSpend": 1000.0,
+        "usesPerUser": 2,
+        "usesPerCoupon": 50,
+        "status": true
+    }
+]
+
+GET /api/v1/coupons/code/SUMMER20
+{
+    "id": 1,
+    "type": "PERCENTAGE",
+    "code": "SUMMER20",
+    "value": 20.0,
+    "startDate": "2023-10-01",
+    "endDate": "2023-10-31",
+    "minSpend": 100.0,
+    "maxSpend": 500.0,
+    "usesPerUser": 1,
+    "usesPerCoupon": 100,
+    "status": true
+}
+
+PUT /api/v1/coupons/1
+{
+    "type": "PERCENTAGE",
+    "code": "SUMMER20",
+    "value": 25.0,
+    "startDate": "2023-10-01",
+    "endDate": "2023-10-31",
+    "minSpend": 100.0,
+    "maxSpend": 600.0,
+    "usesPerUser": 1,
+    "usesPerCoupon": 100,
+    "status": true
+}
