@@ -20,12 +20,9 @@ public class ReqForgetPasswordDTO {
     // OTP validation
     @NotBlank(message = "Mã OTP không được để trống")
     @Size(min = 8, max = 8, message = "Mã OTP phải có đúng 8 ký tự")
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "Chỉ được chứa chữ cái và số, không bao gồm ký tự đặc biệt")
-    private String OTP;
+    private String otpString;
 
     // New password validation
     @NotBlank(message = "Mật khẩu mới không được để trống")
-    @Size(min = 6, max = 10, message = "Mật khẩu mới phải có đúng 8 ký tự")
-    @Pattern(regexp = "[a-zA-Z0-9]{8}", message = "Mật khẩu mới chỉ được chứa chữ cái và số, không bao gồm ký tự đặc biệt")
     private String newPassword;
 }

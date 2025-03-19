@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.tcmytt.ecommerce.domain.User;
+import io.github.tcmytt.ecommerce.domain.request.ReqEmailDTO;
 import io.github.tcmytt.ecommerce.domain.request.ReqForgetPasswordDTO;
 import io.github.tcmytt.ecommerce.domain.request.ReqLoginDTO;
 import io.github.tcmytt.ecommerce.domain.response.ResCreateUserDTO;
@@ -307,12 +308,16 @@ public class AuthController {
         }
 
         @Operation(summary = "Forgot password", description = "Forgot password")
+        @ApiResponse(responseCode = "200", description = "Trigger Forgot password successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @PostMapping("/forgot-password")
-        public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+        public ResponseEntity<String> forgotPassword(@RequestBody ReqEmailDTO req) {
                 // Kiểm tra email có tồn tại không
-                User user = userService.handleGetUserByUsername(email);
-                if (user == null) {
-                        return ResponseEntity.ok("Tài khoản không tồn tại");
+                String email = req.getEmail().trim().toLowerCase();
+                Boolean isExist = userService.isEmailExist(email);
+                if (isExist == false) {
+
+                        return ResponseEntity.ok("Email ' " + email + " '' Tài khoản không tồn tại");
                 }
 
                 // Tạo mã xác thực (OTP)
@@ -330,10 +335,13 @@ public class AuthController {
                 return ResponseEntity.ok("Mã xác thực đã được gửi đến email của bạn");
         }
 
+        @Operation(summary = "Reset password", description = "Reset password")
+        @ApiResponse(responseCode = "200", description = "Reset password successfully")
+        @ApiResponse(responseCode = "400", description = "Bad request")
         @PostMapping("/reset-password")
         public ResponseEntity<String> resetPassword(@Valid @RequestBody ReqForgetPasswordDTO request) {
                 String email = request.getEmail();
-                String providedOtp = request.getOTP();
+                String providedOtp = request.getOtpString();
                 String newPassword = request.getNewPassword();
 
                 // Có thể thêm logic kiểm tra mật khẩu cũ không trùng mật khẩu mới

@@ -27,17 +27,17 @@ import com.nimbusds.jose.util.Base64;
 
 import io.github.tcmytt.ecommerce.domain.User;
 import io.github.tcmytt.ecommerce.domain.response.ResLoginDTO;
-import io.github.tcmytt.ecommerce.service.UserService;
+import io.github.tcmytt.ecommerce.repository.UserRepository;
 
 @Service
 public class SecurityUtil {
-    private final JwtEncoder jwtEncoder;
-    private final UserService userService;
 
-    public SecurityUtil(JwtEncoder jwtEncoder,
-            UserService userService) {
-        this.userService = userService;
+    private final UserRepository userRepository;
+    private final JwtEncoder jwtEncoder;
+
+    public SecurityUtil(JwtEncoder jwtEncoder, UserRepository userRepository) {
         this.jwtEncoder = jwtEncoder;
+        this.userRepository = userRepository;
     }
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
@@ -176,7 +176,7 @@ public class SecurityUtil {
         }
 
         String username = authentication.getName();
-        return userService.handleGetUserByUsername(username);
+        return userRepository.findByEmail(username);
     }
     
 
