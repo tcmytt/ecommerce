@@ -46,6 +46,15 @@ public class ReviewController {
         return ResponseEntity.ok(reviews);
     }
 
+    // get Reviews by Id
+    @Operation(summary = "Get review by ID", description = "Get a review by its ID")
+    @ApiResponse(responseCode = "200", description = "Review retrieved successfully")
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ResReviewResponseDTO> getReviewById(@PathVariable Long reviewId) {
+        ResReviewResponseDTO response = reviewService.getReviewById(reviewId);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Update a review", description = "Update an existing review")
     @ApiResponse(responseCode = "200", description = "Review updated successfully")
     @PutMapping("/{reviewId}")

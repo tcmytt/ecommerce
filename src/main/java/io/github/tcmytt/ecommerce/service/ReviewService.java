@@ -29,6 +29,13 @@ public class ReviewService {
         this.userRepository = userRepository;
     }
 
+    // getReviewById
+    public ResReviewResponseDTO getReviewById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review không tồn tại"));
+        return new ResReviewResponseDTO(review);
+    }
+
     // Tạo review mới
     public ResReviewResponseDTO createReview(ReqCreateReviewDTO dto, Long userId) {
         // Kiểm tra sản phẩm tồn tại

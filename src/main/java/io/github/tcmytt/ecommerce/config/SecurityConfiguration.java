@@ -42,18 +42,9 @@ public class SecurityConfiguration {
             HttpSecurity http, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
 
         String[] whiteList = {
-                "/",
-                "/api/v1/auth/login",
-                "/api/v1/auth/refresh",
-                "/api/v1/auth/register",
-                "/api/v1/auth/forgot-password",
-                "/api/v1/auth/reset-password",
-                "/upload/**",
-                "/api/v1/email/**",
-                "/actuator/**",
-                "/v3/api-docs/**", // Tài liệu API của Swagger
-                "/swagger-ui/**", // Tài nguyên của Swagger UI
-                "/swagger-ui.html", // Trang chính của Swagger UI
+                "/", "/api/v1/auth/**", "/upload/**",
+                "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**",
+                "/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**", "/webjars/**"
         };
 
         http
@@ -64,7 +55,6 @@ public class SecurityConfiguration {
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").permitAll()
                         // Các endpoint khác yêu cầu xác thực qua OAuth2 Login
                         .anyRequest().authenticated())
                 // Cấu hình OAuth2 Resource Server (JWT)

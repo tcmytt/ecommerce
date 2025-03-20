@@ -28,6 +28,24 @@ public class CouponController {
         return ResponseEntity.status(201).body(response);
     }
 
+    // get all coupons
+    @Operation(summary = "Get all coupons", description = "Get all coupons")
+    @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully")
+    @GetMapping
+    public ResponseEntity<List<ResCouponResponseDTO>> getAllCoupons() {
+        List<ResCouponResponseDTO> coupons = couponService.getAllCoupons();
+        return ResponseEntity.ok(coupons);
+    }
+
+    // get coupon by id
+    @Operation(summary = "Get coupon by ID", description = "Get a coupon by its ID")
+    @ApiResponse(responseCode = "200", description = "Coupon retrieved successfully")
+    @GetMapping("/{couponId}")
+    public ResponseEntity<ResCouponResponseDTO> getCouponById(@PathVariable Long couponId) {
+        ResCouponResponseDTO coupon = couponService.getCouponById(couponId);
+        return ResponseEntity.ok(coupon);
+    }
+
     @Operation(summary = "Get coupons by status", description = "Get all coupons by status")
     @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully")
     @GetMapping("/status/{status}")

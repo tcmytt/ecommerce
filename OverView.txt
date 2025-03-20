@@ -1,0 +1,19 @@
+- Cấu hình permission gây phức tạp vấn đề, có thể chỉ cần kiểm tra role của user là được rồi.
+
+
+- Đã hoàn thành :
+
+
+- Nhiệm vụ cần làm :
++ Khi đặt hàng xong gửi mail về thông tin đơn hàng
++ Cache dữ liệu
++ Web socket nói chuyện giữa người bán người mua
++ Thanh toán
++ Lập lịch gửi mail tự động
++ Notification
++ Cấu hình lại permission
++ Kafka 
+
++ Docker đóng gói lại 
++ FrontEnd
++ Mobile App

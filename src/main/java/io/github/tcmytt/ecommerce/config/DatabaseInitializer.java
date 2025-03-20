@@ -59,34 +59,45 @@ public class DatabaseInitializer implements CommandLineRunner {
                         // Category
                         permissions.add(new Permission("Create a category", "/api/v1/categories", "POST",
                                         "CATEGORIES"));
-                        permissions.add(new Permission("Update a category", "/api/v1/categories", "PUT", "CATEGORIES"));
-                        permissions.add(new Permission("Delete a category", "/api/v1/categories/{id}", "DELETE",
+                        permissions.add(new Permission("Update a category", "/api/v1/categories/{categoryId}", "PUT",
                                         "CATEGORIES"));
-                        permissions.add(new Permission("Get a category by id", "/api/v1/categories/{id}", "GET",
+                        permissions.add(new Permission("Delete a category", "/api/v1/categories/{categoryId}", "DELETE",
                                         "CATEGORIES"));
-                        permissions
-                                        .add(new Permission("Get categories with pagination", "/api/v1/categories",
-                                                        "GET", "CATEGORIES"));
+                        permissions.add(new Permission("Get a category by id", "/api/v1/categories/{categoryId}", "GET",
+                                        "CATEGORIES"));
+                        permissions.add(new Permission("Get all categories", "/api/v1/categories", "GET",
+                                        "CATEGORIES"));
 
                         // Coupon
                         permissions.add(new Permission("Create a coupon", "/api/v1/coupons", "POST", "COUPONS"));
-                        permissions.add(new Permission("Update a coupon", "/api/v1/coupons", "PUT", "COUPONS"));
-                        permissions.add(new Permission("Delete a coupon", "/api/v1/coupons/{id}", "DELETE", "COUPONS"));
-                        permissions.add(new Permission("Get a coupon by id", "/api/v1/coupons/{id}", "GET", "COUPONS"));
-                        permissions.add(new Permission("Get coupons with pagination", "/api/v1/coupons", "GET",
+                        permissions.add(new Permission("Update a coupon", "/api/v1/coupons/{couponId}", "PUT",
                                         "COUPONS"));
+                        permissions.add(new Permission("Delete a coupon", "/api/v1/coupons/{couponId}", "DELETE",
+                                        "COUPONS"));
+                        permissions.add(new Permission("Get a coupon by id", "/api/v1/coupons/{couponId}", "GET",
+                                        "COUPONS"));
+                        permissions.add(new Permission("Get all coupons ", "/api/v1/coupons", "GET", "COUPONS"));
+                        permissions.add(new Permission("Get coupons by code ", "/api/v1/coupons/code/{code}", "GET",
+                                        "COUPONS"));
+                        permissions.add(new Permission("Get coupons by status", "/api/v1/coupons/status/{status}",
+                                        "GET", "COUPONS"));
 
                         // Order
                         permissions.add(new Permission("Create an order", "/api/v1/orders", "POST", "ORDERS"));
                         permissions.add(new Permission("Update an order", "/api/v1/orders", "PUT", "ORDERS"));
-                        permissions.add(new Permission("Delete an order", "/api/v1/orders/{id}", "DELETE", "ORDERS"));
-                        permissions.add(new Permission("Get an order by id", "/api/v1/orders/{id}", "GET", "ORDERS"));
+                        permissions.add(new Permission("Delete an order", "/api/v1/orders/{orderId}", "DELETE",
+                                        "ORDERS"));
+                        permissions.add(new Permission("Get an order by id", "/api/v1/orders/{orderId}", "GET",
+                                        "ORDERS"));
                         permissions.add(new Permission("Get user orders with pagination", "/api/v1/orders", "GET",
                                         "ORDERS"));
+                        permissions.add(new Permission("Update an order status", "/api/v1/orders/{orderId}/status",
+                                        "PUT", "ORDERS"));
 
                         // Product
                         permissions.add(new Permission("Create a product", "/api/v1/products", "POST", "PRODUCTS"));
-                        permissions.add(new Permission("Update a product", "/api/v1/products", "PUT", "PRODUCTS"));
+                        permissions.add(new Permission("Update a product but without imgs", "/api/v1/products", "PUT",
+                                        "PRODUCTS"));
                         permissions.add(new Permission("Delete a product", "/api/v1/products/{id}", "DELETE",
                                         "PRODUCTS"));
                         permissions.add(new Permission("Get a product by id", "/api/v1/products/{id}", "GET",
@@ -96,11 +107,14 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                         // Review
                         permissions.add(new Permission("Create a review", "/api/v1/reviews", "POST", "REVIEWS"));
-                        permissions.add(new Permission("Update a review", "/api/v1/reviews", "PUT", "REVIEWS"));
-                        permissions.add(new Permission("Delete a review", "/api/v1/reviews/{id}", "DELETE", "REVIEWS"));
-                        permissions.add(new Permission("Get a review by id", "/api/v1/reviews/{id}", "GET", "REVIEWS"));
-                        permissions.add(new Permission("Get reviews with pagination", "/api/v1/reviews", "GET",
+                        permissions.add(new Permission("Update a review", "/api/v1/reviews/{reviewId}", "PUT",
                                         "REVIEWS"));
+                        permissions.add(new Permission("Delete a review", "/api/v1/reviews/{reviewId}", "DELETE",
+                                        "REVIEWS"));
+                        permissions.add(new Permission("Get a review by id", "/api/v1/reviews/{reviewId}", "GET",
+                                        "REVIEWS"));
+                        permissions.add(new Permission("Get reviews by product", "/api/v1/reviews/product/{productId}",
+                                        "GET", "REVIEWS"));
 
                         // User
                         permissions.add(new Permission("Create a user", "/api/v1/users", "POST", "USERS"));
@@ -111,6 +125,8 @@ public class DatabaseInitializer implements CommandLineRunner {
                                         .add(new Permission("Get all users with pagination and search", "/api/v1/users",
                                                         "GET", "USERS"));
                         permissions.add(new Permission("Update User login Avatar", "/api/v1/users/avatar", "POST",
+                                        "USERS"));
+                        permissions.add(new Permission("Reset password", "/api/v1/users/reset-password", "POST",
                                         "USERS"));
 
                         // Auth
@@ -125,24 +141,6 @@ public class DatabaseInitializer implements CommandLineRunner {
                                         "AUTH"));
 
                         this.permissionRepository.saveAll(permissions);
-                }
-
-                // Khởi tạo Coupons nếu chưa có
-                if (this.couponRepository.count() == 0) {
-                        List<Coupon> coupons = new ArrayList<>();
-                        coupons.add(new Coupon(CouponType.PERCENTAGE, "SUMMER20", new BigDecimal("20.0"),
-                                        "2023-10-01", "2028-10-31", new BigDecimal("100.0"), new BigDecimal("500.0"), 1,
-                                        100, true));
-                        coupons.add(new Coupon(CouponType.FIXED, "WINTER50", new BigDecimal("50.0"),
-                                        "2023-12-01", "2028-12-31", new BigDecimal("200.0"), new BigDecimal("1000.0"),
-                                        2, 50, true));
-                        coupons.add(new Coupon(CouponType.PERCENTAGE, "SPRING15", new BigDecimal("15.0"),
-                                        "2024-03-01", "2028-03-31", new BigDecimal("50.0"), new BigDecimal("300.0"), 1,
-                                        200, true));
-                        coupons.add(new Coupon(CouponType.FIXED, "FALL30", new BigDecimal("30.0"),
-                                        "2024-09-01", "2028-09-30", new BigDecimal("150.0"), new BigDecimal("800.0"), 3,
-                                        75, true));
-                        this.couponRepository.saveAll(coupons);
                 }
 
                 // Khởi tạo Roles nếu chưa có
@@ -162,8 +160,10 @@ public class DatabaseInitializer implements CommandLineRunner {
                         userRole.setPermissions(allPermissions.stream()
                                         .filter(p -> p.getModule().equals("PRODUCTS") ||
                                                         p.getModule().equals("ORDERS") ||
-                                                        p.getModule().equals("AUTH") ||
-                                                        p.getModule().equals("USER"))
+                                                        p.getModule().equals("REVIEWS") ||
+                                                        p.getModule().equals("USER") ||
+                                                        p.getModule().equals("AUTH"))
+
                                         .toList());
 
                         this.roleRepository.save(adminRole);
@@ -195,6 +195,24 @@ public class DatabaseInitializer implements CommandLineRunner {
 
                         this.userRepository.save(adminUser);
                         this.userRepository.save(regularUser);
+                }
+
+                // Khởi tạo Coupons nếu chưa có
+                if (this.couponRepository.count() == 0) {
+                        List<Coupon> coupons = new ArrayList<>();
+                        coupons.add(new Coupon(CouponType.PERCENTAGE, "SUMMER20", new BigDecimal("20.0"),
+                                        "2023-10-01", "2028-10-31", new BigDecimal("100.0"), new BigDecimal("500.0"), 1,
+                                        100, true));
+                        coupons.add(new Coupon(CouponType.FIXED, "WINTER50", new BigDecimal("50.0"),
+                                        "2023-12-01", "2028-12-31", new BigDecimal("200.0"), new BigDecimal("1000.0"),
+                                        2, 50, true));
+                        coupons.add(new Coupon(CouponType.PERCENTAGE, "SPRING15", new BigDecimal("15.0"),
+                                        "2024-03-01", "2028-03-31", new BigDecimal("50.0"), new BigDecimal("300.0"), 1,
+                                        200, true));
+                        coupons.add(new Coupon(CouponType.FIXED, "FALL30", new BigDecimal("30.0"),
+                                        "2024-09-01", "2028-09-30", new BigDecimal("150.0"), new BigDecimal("800.0"), 3,
+                                        75, true));
+                        this.couponRepository.saveAll(coupons);
                 }
 
                 // Khởi tạo categories
@@ -284,7 +302,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 }
 
                 // Kiểm tra và thông báo kết quả
-                if (countPermissions > 0 && countRoles > 0 && countUsers > 0) {
+                if (countPermissions > 0 && countRoles > 0 && countUsers > 0 && countCategories > 0) {
                         System.out.println(">>> SKIP INIT DATABASE ~ ALREADY HAVE DATA...");
                 } else {
                         System.out.println(">>> END INIT DATABASE");

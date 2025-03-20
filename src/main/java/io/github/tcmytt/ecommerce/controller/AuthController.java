@@ -126,6 +126,9 @@ public class AuthController {
                 String email = SecurityUtil.getCurrentUserLogin().isPresent()
                                 ? SecurityUtil.getCurrentUserLogin().get()
                                 : "";
+                if (email.equals("")) {
+                        return ResponseEntity.badRequest().body(null);
+                }
 
                 User currentUserDB = this.userService.handleGetUserByUsername(email);
                 ResLoginDTO.UserLogin userLogin = null;

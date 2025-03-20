@@ -36,6 +36,21 @@ public class CouponService {
         return new ResCouponResponseDTO(savedCoupon);
     }
 
+    // getAllCoupons
+    public List<ResCouponResponseDTO> getAllCoupons() {
+        List<Coupon> coupons = couponRepository.findAll();
+        return coupons.stream()
+                .map(ResCouponResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    // Lấy coupon theo id
+    public ResCouponResponseDTO getCouponById(Long couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new RuntimeException("Coupon không tồn tại"));
+        return new ResCouponResponseDTO(coupon);
+    }
+
     // Lấy danh sách coupon theo trạng thái
     public List<ResCouponResponseDTO> getCouponsByStatus(Boolean status) {
         List<Coupon> coupons = couponRepository.findByStatus(status);
