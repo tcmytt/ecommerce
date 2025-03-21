@@ -1,126 +1,97 @@
 package io.github.tcmytt.ecommerce.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import io.github.tcmytt.ecommerce.domain.Order;
 import io.github.tcmytt.ecommerce.domain.User;
+import io.github.tcmytt.ecommerce.domain.enums.OrderStatus;
 import io.github.tcmytt.ecommerce.domain.request.ReqCreateOrderDTO;
-import io.github.tcmytt.ecommerce.domain.request.ReqUpdateOrderStatusDTO;
+import io.github.tcmytt.ecommerce.domain.response.ResOrderResponseDTO;
 import io.github.tcmytt.ecommerce.service.OrderService;
-import io.github.tcmytt.ecommerce.util.SecurityUtil;
+import io.github.tcmytt.ecommerce.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
-    private final SecurityUtil securityUtil;
+    private final UserService userService;
 
-    public OrderController(OrderService orderService, SecurityUtil securityUtil) {
+    public OrderController(OrderService orderService, UserService userService) {
+        this.userService = userService;
         this.orderService = orderService;
-        this.securityUtil = securityUtil;
     }
 
-    @Operation(summary = "Create order", description = "Create a new order")
+    @Operation(summary = "Create an order", description = "Create a new order")
     @ApiResponse(responseCode = "201", description = "Order created successfully")
-    @PostMapping(consumes = "application/json")
-    public ResponseEntity<Order> createOrder(@RequestBody ReqCreateOrderDTO orderDTO) {
-        // Lấy user hiện tại
-        User currentUser = securityUtil.getCurrentUser();
-
-        // Tạo đơn hàng
-        Order createdOrder = orderService.createOrder(orderDTO, currentUser);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+    @PostMapping
+    public ResponseEntity<ResOrderResponseDTO> createOrder(@RequestBody ReqCreateOrderDTO dto) {
+        // Lấy thông tin người dùng từ Security Context
+        User user = getCurrentUser(); // Giả sử có method lấy user từ context
+        return ResponseEntity.status(201).body(orderService.createOrder(dto, user));
     }
 
-    /**
-     * Lấy danh sách đơn hàng của người dùng hiện tại
-     */
-    @Operation(summary = "Get all orders", description = "Returns a list of all orders with pagination and sorting")
-    @ApiResponse(responseCode = "200", description = "Orders retrieved successfully")
-    @GetMapping
-    public ResponseEntity<Page<Order>> getOrdersByUser(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String direction) {
-
-        // Lấy user hiện tại
-        User currentUser = securityUtil.getCurrentUser();
-
-        // Phân trang và sắp xếp
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-
-        // Lấy danh sách đơn hàng
-        Page<Order> orders = orderService.getOrdersByUser(currentUser.getId(), pageable);
-
-        return ResponseEntity.ok(orders);
+    @Operation(summary = "Update an order", description = "Update an existing order")
+    @ApiResponse(responseCode = "200", description = "Order updated successfully")
+    @PutMapping("/{orderId}")
+    public ResponseEntity<ResOrderResponseDTO> updateOrder(
+            @PathVariable Long orderId,
+            @RequestBody ReqCreateOrderDTO dto) {
+        User user = getCurrentUser(); // Lấy thông tin người dùng
+        return ResponseEntity.ok(orderService.updateOrder(orderId, dto, user));
     }
 
-    /**
-     * Xem chi tiết đơn hàng
-     */
-    @Operation(summary = "Get order by ID", description = "Returns an order by ID")
-    @ApiResponse(responseCode = "200", description = "Order retrieved successfully")
-    @GetMapping("/{orderId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
-        // Lấy user hiện tại
-        User currentUser = securityUtil.getCurrentUser();
-
-        // Lấy đơn hàng
-        Order order = orderService.getOrderByIdAndUser(orderId, currentUser.getId());
-
-        return ResponseEntity.ok(order);
-    }
-
-    /**
-     * Cập nhật trạng thái đơn hàng
-     */
-    @Operation(summary = "Update order status", description = "Update order status")
+    @Operation(summary = "Update order status", description = "Update the status of an existing order")
     @ApiResponse(responseCode = "200", description = "Order status updated successfully")
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<Order> updateOrderStatus(
+    public ResponseEntity<ResOrderResponseDTO> updateOrderStatus(
             @PathVariable Long orderId,
-            @RequestBody ReqUpdateOrderStatusDTO statusDTO) {
-
-        // Cập nhật trạng thái
-        Order updatedOrder = orderService.updateOrderStatus(orderId, statusDTO.getStatus());
-
-        return ResponseEntity.ok(updatedOrder);
+            @RequestParam OrderStatus status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
     }
 
-    /**
-     * Hủy đơn hàng
-     */
-    @Operation(summary = "Cancel order", description = "Cancel an order")
-    @ApiResponse(responseCode = "204", description = "Order canceled successfully")
-    @DeleteMapping("/{orderId}")
-    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
-        // Lấy user hiện tại
-        User currentUser = securityUtil.getCurrentUser();
+    @Operation(summary = "Get current order", description = "Get the current pending order of the user")
+    @ApiResponse(responseCode = "200", description = "Order retrieved successfully")
+    @ApiResponse(responseCode = "404", description = "No pending order found")
+    @GetMapping("/current")
+    public ResponseEntity<ResOrderResponseDTO> getCurrentOrder() {
+        User user = getCurrentUser(); // Lấy thông tin người dùng
+        return ResponseEntity.ok(orderService.getCurrentOrder(user));
+    }
 
-        // Hủy đơn hàng
-        orderService.cancelOrder(orderId, currentUser.getId());
+    // Method giả định để lấy thông tin người dùng từ Security Context
+    private User getCurrentUser() {
+        // Logic lấy user từ context (ví dụ: SecurityUtil.getCurrentUser())
+        // Lấy user từ SecurityContext
+        var userOptional = SecurityContextHolder.getContext().getAuthentication();
+        if (userOptional == null || userOptional.getName() == null) {
+            throw new RuntimeException("User is not authenticated");
+        }
 
+        User user = userService.handleGetUserByUsername(userOptional.getName());
+        return user; // Placeholder
+    }
+
+    @Operation(summary = "Delete current order", description = "Delete the current pending order and create a new empty order")
+    @ApiResponse(responseCode = "204", description = "Order deleted successfully")
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteOrder() {
+        User user = getCurrentUser(); // Lấy thông tin người dùng
+        orderService.deleteOrder(user);
         return ResponseEntity.noContent().build();
     }
 
-    // update order
+    @Operation(summary = "Get order history", description = "Get all orders of the user that are not PENDING")
+    @ApiResponse(responseCode = "200", description = "Order history retrieved successfully")
+    @GetMapping("/history")
+    public ResponseEntity<Page<ResOrderResponseDTO>> getOrderHistory(Pageable pageable) {
+        // Lấy thông tin người dùng từ Security Context
+        User user = getCurrentUser(); // Giả sử có method lấy user từ context
+        return ResponseEntity.ok(orderService.getOrderHistory(user, pageable));
+    }
 }

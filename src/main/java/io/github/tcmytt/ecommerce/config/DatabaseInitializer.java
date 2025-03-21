@@ -85,11 +85,12 @@ public class DatabaseInitializer implements CommandLineRunner {
                         // Order
                         permissions.add(new Permission("Create an order", "/api/v1/orders", "POST", "ORDERS"));
                         permissions.add(new Permission("Update an order", "/api/v1/orders", "PUT", "ORDERS"));
-                        permissions.add(new Permission("Delete an order", "/api/v1/orders/{orderId}", "DELETE",
+                        permissions.add(new Permission("Delete an order", "/api/v1/orders/delete", "DELETE",
                                         "ORDERS"));
-                        permissions.add(new Permission("Get an order by id", "/api/v1/orders/{orderId}", "GET",
+                        permissions.add(new Permission("Get current order ", "/api/v1/orders/current", "GET",
                                         "ORDERS"));
-                        permissions.add(new Permission("Get user orders with pagination", "/api/v1/orders", "GET",
+                        permissions.add(new Permission("Get user orders with pagination", "/api/v1/orders/history",
+                                        "GET",
                                         "ORDERS"));
                         permissions.add(new Permission("Update an order status", "/api/v1/orders/{orderId}/status",
                                         "PUT", "ORDERS"));
