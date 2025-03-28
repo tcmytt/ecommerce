@@ -13,4 +13,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // Tìm sản phẩm theo categoryId với phân trang và sắp xếp
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
 
+    // Lọc sản phẩm theo categoryId và search
+    Page<Product> findByCategoryIdAndNameContainingIgnoreCase(Long categoryId, String search, Pageable pageable);
+
+    // Tìm kiếm sản phẩm theo từ khóa
+    Page<Product> findByNameContainingIgnoreCase(String search, Pageable pageable);
+
 }

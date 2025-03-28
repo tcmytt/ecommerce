@@ -43,6 +43,14 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    public Page<Product> fetchByCategoryAndSearch(Long categoryId, String search, Pageable pageable) {
+        return productRepository.findByCategoryIdAndNameContainingIgnoreCase(categoryId, search, pageable);
+    }
+
+    public Page<Product> searchProducts(String search, Pageable pageable) {
+        return productRepository.findByNameContainingIgnoreCase(search, pageable);
+    }
+
     public boolean isIdExist(long id) {
         return this.productRepository.existsById(id);
     }

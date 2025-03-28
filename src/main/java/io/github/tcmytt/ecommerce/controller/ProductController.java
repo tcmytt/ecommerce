@@ -52,13 +52,14 @@ public class ProductController {
         this.fileStorageService = fileStorageService;
     }
 
-    @Operation(summary = "Get all products", description = "Returns a list of all products with pagination and sorting")
+    @Operation(summary = "Get all products", description = "Returns a list of all products with pagination, sorting, and search")
     @ApiResponse(responseCode = "200", description = "Products retrieved successfully")
     @GetMapping
-    public ResponseEntity<Page<Product>> fetchAllWithPaginationAndSorting(
+    public ResponseEntity<Page<Product>> fetchAllWithPaginationSortingAndSearch(
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(name = "direction", defaultValue = "asc") String direction,
-            @RequestParam(name = "categoryId", required = false) Long categoryId) {
+            @RequestParam(name = "categoryId", required = false) Long categoryId,
+            @RequestParam(name = "search", required = false) String search) {
 
         int page = 0;
         int size = 10;
@@ -72,13 +73,22 @@ public class ProductController {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // Truy vấn dữ liệu
-        if (categoryId != null) {
+        if (categoryId != null && search != null) {
+            // Lọc sản phẩm theo categoryId và search
+            return ResponseEntity.ok()
+                    .body(this.productService.fetchByCategoryAndSearch(categoryId, search, pageable));
+        } else if (categoryId != null) {
             // Lọc sản phẩm theo categoryId
             return ResponseEntity.ok()
                     .body(this.productService.fetchByCategoryWithPaginationAndSorting(categoryId, pageable));
+        } else if (search != null) {
+            // Tìm kiếm sản phẩm theo từ khóa
+            return ResponseEntity.ok()
+                    .body(this.productService.searchProducts(search, pageable));
         } else {
-            // Lấy tất cả sản phẩm nếu không có categoryId
-            return ResponseEntity.ok().body(this.productService.fetchAllWithPaginationAndSorting(pageable));
+            // Lấy tất cả sản phẩm nếu không có categoryId và search
+            return ResponseEntity.ok()
+                    .body(this.productService.fetchAllWithPaginationAndSorting(pageable));
         }
     }
 
@@ -147,4 +157,5 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.ok("Product deleted successfully");
     }
+
 }

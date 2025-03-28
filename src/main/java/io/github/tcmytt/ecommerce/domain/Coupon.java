@@ -9,6 +9,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.github.tcmytt.ecommerce.domain.enums.CouponType;
 
 @Entity
@@ -44,6 +46,7 @@ public class Coupon {
     private Boolean status;
 
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Order> orders;
 
     // Constructor đầy đủ tham số
